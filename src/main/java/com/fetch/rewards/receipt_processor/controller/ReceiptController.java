@@ -7,14 +7,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fetch.rewards.receipt_processor.model.Receipt;
-import com.fetch.rewards.receipt_processor.repository.ReceiptRepository;
-import com.fetch.rewards.receipt_processor.service.ReceiptProcessorService;
 import com.fetch.rewards.receipt_processor.service.ReceiptService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;  
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 /**
  * 
  */
+
 @RestController
 @RequestMapping("/receipts")
 public class ReceiptController {
@@ -40,6 +42,7 @@ public class ReceiptController {
 	        this.receiptService = receiptService;
 	    }
     
+
 	    @PostMapping("/process")
 	    public ResponseEntity<Map<String, Object>> processReceipt(@Valid @RequestBody Receipt receipt, BindingResult result) {
 	        if (result.hasErrors()) {
@@ -49,6 +52,7 @@ public class ReceiptController {
 	        String id = receiptService.saveReceipt(receipt);
 	        return ResponseEntity.ok(Collections.singletonMap("id", id));
 	    }
+
 
 	    @GetMapping("/{id}/points")
 	    public ResponseEntity<Map<String, Object>> getPoints(@PathVariable String id) {
