@@ -18,7 +18,7 @@ The API is designed to run as a **Dockerized application**, ensuring easy deploy
 Before running the API, clone the GitHub repository and navigate into the project folder:
 
 ```sh
-git clone https://github.com/your-username/receipt-processor.git
+git clone https://github.com/ChinmayDeosthali/receipt-processor.git
 cd receipt-processor
 ```
 
