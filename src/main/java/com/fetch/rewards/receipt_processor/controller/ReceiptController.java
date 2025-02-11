@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fetch.rewards.receipt_processor.model.Receipt;
 import com.fetch.rewards.receipt_processor.repository.ReceiptRepository;
 import com.fetch.rewards.receipt_processor.service.ReceiptProcessorService;
+import com.fetch.rewards.receipt_processor.service.ReceiptService;
 
 import jakarta.validation.Valid;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,37 +34,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/receipts")
 public class ReceiptController {
 	
-	private final ReceiptRepository receiptRepository;
-	private final ReceiptProcessorService receiptProcessorService;
-	
-    public ReceiptController(ReceiptRepository receiptRepository, ReceiptProcessorService receiptProcessorService) {
-        this.receiptRepository = receiptRepository;
-        this.receiptProcessorService = receiptProcessorService;
-    }
-	
-    @PostMapping("/process")
-    public ResponseEntity<?> processReceipt(@Valid @RequestBody Receipt receipt, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "The receipt is invalid."));
-        }
+	  private final ReceiptService receiptService;
 
-        String id = receiptRepository.save(receipt);
-        return ResponseEntity.ok(Collections.singletonMap("id", id));
-    }
-	
-	
-	@GetMapping("/{id}/points")
-	public ResponseEntity<?> getPoints(@PathVariable String id) {
-	    Receipt receipt = receiptRepository.findById(id).orElse(null);
+	    public ReceiptController(ReceiptService receiptService) {
+	        this.receiptService = receiptService;
+	    }
+    
+	    @PostMapping("/process")
+	    public ResponseEntity<Map<String, Object>> processReceipt(@Valid @RequestBody Receipt receipt, BindingResult result) {
+	        if (result.hasErrors()) {
+	        	return ResponseEntity.badRequest().body(Collections.singletonMap("error", "The receipt is invalid."));
+	        }
 
-	    if (receipt == null) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                .body(Collections.singletonMap("error", "No receipt found for that ID."));
+	        String id = receiptService.saveReceipt(receipt);
+	        return ResponseEntity.ok(Collections.singletonMap("id", id));
 	    }
 
-	    int points = receiptProcessorService.calculatePoints(receipt);
-	    return ResponseEntity.ok(Collections.singletonMap("points", points));
-	}
+	    @GetMapping("/{id}/points")
+	    public ResponseEntity<Map<String, Object>> getPoints(@PathVariable String id) {
+	        Optional<Receipt> receiptOptional = receiptService.findReceiptById(id);
+	        if (receiptOptional.isEmpty()) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                    .body(Collections.singletonMap("error", "No receipt found for that ID."));
+	        }
+
+	        int points = receiptService.calculatePoints(receiptOptional.get());
+	        return ResponseEntity.ok(Collections.singletonMap("points", points));
+	    }
 
 	
 
